@@ -34,7 +34,7 @@ public class GameManager : MonoBehaviour
 
         playerCards.Remove(playerCard);  // Loại bỏ lá bài người chơi đã chọn
 
-        string aiCard = ChooseAICard();  // AI chọn bài ngẫu nhiên
+        string aiCard = ChooseAICard();  // AI chọn bài ngẫu nhiên hoặc chiến lược
         aiCards.Remove(aiCard);
 
         Debug.Log("Người chơi chọn: " + playerCard + " | AI chọn: " + aiCard);
@@ -71,18 +71,58 @@ public class GameManager : MonoBehaviour
         int i;
         if (aiDifficulty == 1) // Easy: AI chọn ngẫu nhiên
         {
-            i = Random.Range(0, aiCards.Count);
+            i = ChooseAICardEasy();
         }
         else if (aiDifficulty == 2) // Medium: AI chọn ngẫu nhiên nhưng ưu tiên thẻ mạnh hơn
         {
-            i = Random.Range(0, aiCards.Count); // Tùy chỉnh logic này
+            i = ChooseAICardAlphaBeta(); // Minimax hoặc Alpha-Beta
         }
         else // Hard: AI chọn thẻ thông minh hơn
         {
-            i = Random.Range(0, aiCards.Count); // AI có thể dựa vào chiến lược
+            i = ChooseAICardMCTS(); // Monte Carlo Tree Search hoặc chiến lược khác
         }
         return aiCards[i];
     }
+
+    // AI chọn thẻ với Minimax
+    int ChooseAICardMinimax()
+    {
+        // Implement Minimax hoặc Alpha-Beta Pruning ở đây (đơn giản hoá)
+        return Random.Range(0, aiCards.Count);
+    }
+
+    // AI chọn thẻ với MCTS
+    int ChooseAICardMCTS()
+    {
+        string bestMove = aiCards[0];
+        float bestValue = float.MinValue;
+
+        foreach (var card in aiCards)
+        {
+            float score = SimulateMCTS(card);  // MCTS sẽ tính toán khả năng chiến thắng của mỗi thẻ
+            if (score > bestValue)
+            {
+                bestValue = score;
+                bestMove = card;
+            }
+        }
+
+        return aiCards.IndexOf(bestMove);  // Trả về chỉ mục của lá bài chọn tốt nhất
+    }
+
+    // Mô phỏng MCTS: Mô phỏng nhiều lượt và tính điểm cho mỗi thẻ
+    float SimulateMCTS(string card)
+    {
+        // Giả lập 1000 lần chơi và tính trung bình kết quả
+        float totalScore = 0;
+        for (int i = 0; i < 1000; i++)
+        {
+            totalScore += Random.Range(0f, 1f);  // Mô phỏng ngẫu nhiên, có thể thay bằng mô phỏng thực tế
+        }
+
+        return totalScore / 1000;  // Điểm trung bình
+    }
+
 
     // Xử lý kết quả theo luật
     string ResolveTurn(string player, string ai)
@@ -131,13 +171,13 @@ public class GameManager : MonoBehaviour
             // Nếu có người thắng hoặc thua, hiển thị kết thúc
             resultText.text = outcome + "\nTrận đấu kết thúc!";
             mainMenuButton.SetActive(true);  // Quay lại Main Menu
-            restartButton.SetActive(false); // Tắt nút Restart
+            restartButton.SetActive(true); // Tắt nút Restart
         }
         else
         {
             // Nếu hòa, chỉ có thể chơi lại
             resultText.text = outcome;
-            mainMenuButton.SetActive(false);  // Ẩn nút Main Menu
+            mainMenuButton.SetActive(true);  // Ẩn nút Main Menu
             restartButton.SetActive(true);   // Hiển thị nút Restart
         }
     }
@@ -152,5 +192,77 @@ public class GameManager : MonoBehaviour
     public void RestartGame()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);  // Restart Scene hiện tại
+    }
+
+    int ChooseAICardEasy()
+    {
+        return Random.Range(0, aiCards.Count);  // Trả về chỉ mục của thẻ chọn ngẫu nhiên
+    }
+
+
+    // Tìm nước đi tốt nhất với Alpha-Beta
+    int ChooseAICardAlphaBeta()
+    {
+        string bestMove = aiCards[0];
+        int bestValue = int.MinValue;
+
+        // Duyệt qua tất cả các thẻ để tìm nước đi tốt nhất
+        foreach (var card in aiCards)
+        {
+            int score = AlphaBeta(card, int.MinValue, int.MaxValue, 3, true);  // 3 là độ sâu của cây tìm kiếm
+            if (score > bestValue)
+            {
+                bestValue = score;
+                bestMove = card;
+            }
+        }
+
+        return aiCards.IndexOf(bestMove);  // Trả về chỉ mục của lá bài chọn tốt nhất
+    }
+
+
+    // Alpha-Beta Pruning Recursive Function
+    int AlphaBeta(string card, int alpha, int beta, int depth, bool isMaximizingPlayer)
+    {
+        if (depth == 0)
+        {
+            return EvaluateBoard(card);  // Đánh giá điểm của cây tìm kiếm
+        }
+
+        if (isMaximizingPlayer)
+        {
+            int bestScore = int.MinValue;
+            foreach (var nextCard in aiCards)
+            {
+                int score = AlphaBeta(nextCard, alpha, beta, depth - 1, false);
+                bestScore = Mathf.Max(bestScore, score);
+                alpha = Mathf.Max(alpha, bestScore);
+                if (beta <= alpha)
+                {
+                    break; // Cắt bớt nhánh không cần thiết
+                }
+            }
+            return bestScore;
+        }
+        else
+        {
+            int bestScore = int.MaxValue;
+            foreach (var nextCard in aiCards)
+            {
+                int score = AlphaBeta(nextCard, alpha, beta, depth - 1, true);
+                bestScore = Mathf.Min(bestScore, score);
+                beta = Mathf.Min(beta, bestScore);
+                if (beta <= alpha)
+                {
+                    break; // Cắt bớt nhánh không cần thiết
+                }
+            }
+            return bestScore;
+        }
+    }
+
+    int EvaluateBoard(string card)
+    {
+        return Random.Range(1, 10);  // Đánh giá ngẫu nhiên, có thể thay bằng logic chiến thuật.
     }
 }

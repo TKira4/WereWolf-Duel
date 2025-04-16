@@ -52,6 +52,7 @@ public class MainMenu : MonoBehaviour
     // Hàm này để thoát game
     public void ExitGame()
     {
+        SceneManager.LoadScene("GameScene");
         Application.Quit();  // Thoát khỏi game
     }
 }
