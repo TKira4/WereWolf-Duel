@@ -137,10 +137,19 @@ public class GameManager : MonoBehaviour
         if (ai == "Seer" && player == "Werewolf")
             return "AI dùng Tiên tri đoán trúng Sói – BẠN THUA!";
 
-        if (player == "Hunter" && ai == "Villager")
-            return "Bạn là Thợ săn, AI là Dân – BẠN THẮNG! Và AI mất 1 lá!";
-        if (ai == "Hunter" && player == "Villager")
-            return "AI là Thợ săn, bạn là Dân – BẠN THUA! Và bạn mất 1 lá!";
+        if(player == "Hunter")
+        {
+            if (ai == "Villager") return "Bạn bắn chết dân – BẠN THUA!";
+            else if (ai == "Hunter") return "Cả 2 đều chết - Hòa lượt này";
+            else return "Bạn bắn chết đối phương - BẠN THẮNG!";
+        }
+
+        if (ai == "Hunter")
+        {
+            if (player == "Villager") return "AI bắn chết dân – BẠN THẮNG!";
+            else if (player == "Hunter") return "Cả 2 đều chết - Hòa lượt này";
+            else return "Bạn bị bắn chết - BẠN THUA!";
+        }
 
         return "Hòa lượt này.";
     }

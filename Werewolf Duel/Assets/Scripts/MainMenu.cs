@@ -4,11 +4,10 @@ using TMPro;
 
 public class MainMenu : MonoBehaviour
 {
-    // Các Button trong MainMenu
+    // Các Panel UI trong MainMenu
     public GameObject aiModePanel;
     public GameObject onlineModePanel;
     public GameObject difficultyPanel;
-    
 
     // Hàm gọi khi người chơi chọn chế độ AI và độ khó
     public void PlayAI(int difficulty)
@@ -24,7 +23,7 @@ public class MainMenu : MonoBehaviour
     {
         // Lưu chế độ Online và chuyển sang GameScene
         PlayerPrefs.SetString("GameMode", "Online");
-        SceneManager.LoadScene("GameScene");  // Chuyển sang Scene Game với Online
+        SceneManager.LoadScene("MultiplayerScene");  // Chuyển sang Scene Multiplayer với Online
     }
 
     // Hiện panel AI và ẩn các panel khác
@@ -43,16 +42,9 @@ public class MainMenu : MonoBehaviour
         difficultyPanel.SetActive(false);
     }
 
-    // Hiển thị các nút độ khó khi chọn chế độ AI
-    public void ShowDifficultyPanel()
-    {
-        difficultyPanel.SetActive(true);
-    }
-
     // Hàm này để thoát game
     public void ExitGame()
     {
-        SceneManager.LoadScene("GameScene");
         Application.Quit();  // Thoát khỏi game
     }
 }
