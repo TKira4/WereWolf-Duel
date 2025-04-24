@@ -15,15 +15,8 @@ public class PlayerController : MonoBehaviourPun
 
     void Start()
     {
-        // Chỉ thiết lập UI cho local player
-        if (!photonView.IsMine) return;
+        if (!photonView.IsMine) return; // Chỉ thiết lập UI cho local player
         InitializeCardButtons();
-
-        // Debug: in tên các lá bài
-        for (int i = 0; i < playerCards.Length; i++)
-        {
-            Debug.Log($"Card {i}: {playerCards[i].name}");
-        }
     }
 
     void InitializeCardButtons()
@@ -31,19 +24,33 @@ public class PlayerController : MonoBehaviourPun
         for (int i = 0; i < cardButtons.Length; i++)
         {
             int idx = i;
-            cardButtons[i].onClick.AddListener(() => OnCardSelected(idx));
+            cardButtons[i].onClick.AddListener(() => OnCardSelected(idx)); // Gán sự kiện click cho các nút
         }
     }
 
     public void OnCardSelected(int index)
     {
-        if (index < 0 || index >= playerCards.Length) return;
+        if (index < 0 || index >= playerCards.Length)
+        {
+            Debug.LogError("Chỉ số thẻ bài không hợp lệ!");
+            return;
+        }
+
         selectedCardIndex = index;
         Debug.Log($"[{photonView.Owner.NickName}] chọn: {playerCards[index].name}");
 
         if (PhotonNetwork.InRoom)
         {
-            photonView.RPC(nameof(OnCardChosenRPC), RpcTarget.AllBuffered, selectedCardIndex);
+            MultiplayerGameManager gameManager = FindObjectOfType<MultiplayerGameManager>();
+            if (gameManager != null)
+            {
+                Debug.Log("Gọi OnCardSelected trong MultiplayerGameManager.");
+                gameManager.OnCardSelected(selectedCardIndex);
+            }
+            else
+            {
+                Debug.LogError("MultiplayerGameManager không được tìm thấy trong Scene!");
+            }
         }
         else
         {
@@ -51,15 +58,5 @@ public class PlayerController : MonoBehaviourPun
         }
     }
 
-    [PunRPC]
-    private void OnCardChosenRPC(int cardIndex)
-    {
-        Debug.Log($"RPC nhận: lá bài được chọn là {playerCards[cardIndex].name}");
-        // Ví dụ cập nhật sprite nếu có SpriteRenderer
-        var sr = GetComponent<SpriteRenderer>();
-        if (sr != null && playerCards[cardIndex].TryGetComponent<SpriteRenderer>(out var cardSr))
-        {
-            sr.sprite = cardSr.sprite;
-        }
-    }
+
 }

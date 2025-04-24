@@ -14,7 +14,9 @@ public class GameManager : MonoBehaviour
 
     private bool waitingForPlayer = true;
     private int aiDifficulty = 2; // Mặc định là Medium
-
+    public GameObject stopMenu;
+    public GameObject returnMenu;
+    public GameObject continueGame;
     public GameObject resultPanel;
     public GameObject mainMenuButton;
     public GameObject restartButton;
@@ -273,5 +275,14 @@ public class GameManager : MonoBehaviour
     int EvaluateBoard(string card)
     {
         return Random.Range(1, 10);  // Đánh giá ngẫu nhiên, có thể thay bằng logic chiến thuật.
+    }
+
+    public void displayMenu()
+    {
+        stopMenu.SetActive(true);
+    }
+    public void continueButton()
+    {
+        stopMenu.SetActive(false);
     }
 }
